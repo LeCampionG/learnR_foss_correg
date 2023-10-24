@@ -47,35 +47,31 @@ knitr::opts_chunk$set(echo=TRUE,
 
 ## Introduction
 
-<p><img src="css/img/FOSS.png" align='center' style='display:inline-block;max-width:750px'>
+<img src="css/img/FOSS.png" align='center' style='display:inline-block;max-width:750px'>
 
 **Cet atelier est animé par Grégoire Le Campion et Laurence Reboul.**
 
-Il s'agit dans cet atelier de suivre tout le chemininement sur R pour réaliser une analyse de corrélation, un modèle de régression linéaire et le diagnostic de ce modèle.
-<br>
-En revanche,il ne s'agira pas ici de revenir sur le fond theorique de ce que sont une analyse de correlation et un modèle de régression. L'objectif de cet atelier est de permettre à tous les participant de cette ANF de partir sur les mêmes bases pour la réalisation sur R de ces analyses.
-<br>
-Il ne s'agit donc pas d'un atelier de perfectionnement sur la correlation ou la régression et ce n'est pas un atelier d'initiation à R.
-<br>
+Il s'agit dans cet atelier de suivre tout le cheminement sur R pour réaliser une analyse de corrélation, un modèle de régression linéaire et le diagnostic de ce modèle.
+
+En revanche,il ne s'agira pas ici de revenir sur le fond théorique de ce que sont une analyse de corrélation et un modèle de régression. L'objectif de cet atelier est de permettre à tous les participants de cette ANF de partir sur les mêmes bases pour la réalisation sur R de ces analyses.
+
+Il ne s'agit donc pas d'un atelier de perfectionnement sur la corrélation ou la régression et ce n'est pas un atelier d'initiation à R.
+
 Nous vous présenterons un "workflow" personnel qui pourra être l'objet d'échange avec les participant aguerris, ou un guide pour les novices.
 
-
-<br>
 Pour télécharger les données que nous utiliserons ici (et qui pourront servir tout au long de la semaine) :
 
 Les données présentées en exemple au cours de cet atelier :
-<br>   
-<p class="center">[<span style="font-size: 230%;" class="glyphicon glyphicon-download-alt"></span> <br/> Télécharger les données prix de l'immobilier](https://gitlab.in2p3.fr/letg/initiation-formation-aux-statistiques-spatiales/-/blob/master/public/data/donnees_standr.csv)</p>
-<br>
 
-Un jeux de données pour ceux qui voudraient expérimenté par eux même :
-<br>   
+<p class="center">[<span style="font-size: 230%;" class="glyphicon glyphicon-download-alt"></span> <br/> Télécharger les données prix de l'immobilier](https://gitlab.in2p3.fr/letg/initiation-formation-aux-statistiques-spatiales/-/blob/master/public/data/donnees_standr.csv)</p>
+
+Un jeu de données pour ceux qui voudraient expérimenter par eux-mêmes :
+
 <p class="center">[<span style="font-size: 230%;" class="glyphicon glyphicon-download-alt"></span> <br/> Télécharger les données Marseille](https://gitlab.in2p3.fr/letg/initiation-formation-aux-statistiques-spatiales/-/blob/master/public/data/data_marseille.csv)</p>
-<br>
 
 Petit rappel du programme :
 
-<p><img src="css/img/programme.png" align='center' style='display:inline-block'>
+<img src="css/img/programme.png" align='center' style='display:inline-block'>
 
 ## Présentation et chargement des données
 
@@ -95,9 +91,8 @@ library(table1)
 library(correlation)
 library(parameters)
 library(performance)
-# Ces trois packages peuvent être appellés en une fois avec library(easystats). Easystats est une suite de packages tournée vers la réalisation de statistique et offre un environnement de travail trè sdocumenté et intéressant.
+# Ces trois packages peuvent être appelés en une fois avec library(easystats). Easystats est une suite de packages tournée vers la réalisation de statistique et offre un environnement de travail très documenté et intéressant.
 library(car)
-
 
 ## Représentations graphiques
 library(plotly)
@@ -110,7 +105,6 @@ library(gtsummary)
 
 ## Représentation cartographique
 library(mapsf)
-
 
 ```
 
@@ -134,13 +128,13 @@ Ce fichier a été constitué par Frédéric Audard et Alice Ferrari à partir d
 - part_cadre_profintellec_nbemploi : % cadres et professions intellectuelles
 
 La varibale SIREN, correspond à un identifiant et la variable prix_med sera notre variable dépendante.
-Attention, hormis les deux variables que nous venons de citer toutes les autres ont été standardisé.
+Attention, hormis les deux variables que nous venons de citer toutes les autres ont été standardisées.
 
-> "Un EPCI est un établissement public de coopération intercommunale (EPCI) C'est une structure administrative permettant à plusieurs communes d’exercer des compétences en commun.
+> "Un EPCI est un établissement public de coopération intercommunale (EPCI). C'est une structure administrative permettant à plusieurs communes d’exercer des compétences en commun.
 Les EPCI sont soumis à des règles communes, homogènes et comparables à celles de collectivités locales. Les communautés urbaines, communautés d'agglomération, communautés de communes, syndicats d'agglomération nouvelle, syndicats de communes et les syndicats mixtes sont des EPCI." Définition INSEE
 
 <div class="alert alert-danger" role="alert">
-Aparté sur la standardisation : on parle daussi de données centrées-réduites, cla implique qu'elles ont subi une transformation statistique visant à ce qu'elles aient une moyenne de 0 et un écart-type de 1.
+Aparté sur la standardisation : on parle aussi de données centrées-réduites, cela implique qu'elles ont subi une transformation statistique visant à ce qu'elles aient une moyenne de 0 et un écart-type de 1.
 Cette transformation permet de conserver la variabilité de nos données et de rendre nos prédicteurs comparables.
 <hr>
 Lorsque l'on s'apprête à faire de la modélisation statistique il est très recommandé de réaliser cette opération au moins sur les variables que vous utiliserez comme variables explicatives dans votre modèle.
@@ -153,7 +147,7 @@ Sur R on peut facilement réaliser cette opération avec la fonction [scale()](h
 Il s'agit d'un fichier qui pourra servir pour mettre en pratique les lignes de codes que nous allons voir ici.
 Il s'agit des données de pauvreté par IRIS de la ville Marseille. Ces données proviennent de l'INSEE (https://www.insee.fr/fr/statistiques/6049648)
 
-> "L'IRIS Un sigle qui signifie « Ilots Regroupés pour l'Information Statistique » et qui fait référence à la taille visée de 2 000 habitants par maille élémentaire." Définition INSEE
+> "L'IRIS : un sigle qui signifie « Ilots Regroupés pour l'Information Statistique » et qui fait référence à la taille visée de 2 000 habitants par maille élémentaire." Définition INSEE
 
 Il contient les variables suivantes : 
 
@@ -174,10 +168,11 @@ Attention, comme précédemment les variables qui peuvent constituer les prédic
 ### Chargement des données sur le prix de l'immobilier par EPCI
 
 ```{r chargement, exercise = FALSE, exercise.eval = FALSE}
+# Chargement des données CSV sur le prix de l'immobilier
 csv_path <- here("data", "donnees_standr.csv")
 immo_df <- read.csv2(csv_path)
 
-#Pour visualiser les données dans le doc
+# Pour visualiser les données dans le doc
 datatable(head(immo_df, 10))
 ```
 
@@ -187,6 +182,7 @@ datatable(head(immo_df, 10))
 Ces données proviennent de la base [ADMIN-EPXRESS-COG de l'IGN](https://geoservices.ign.fr/adminexpress){target="_blank"}, édition 2021. On les charge dans un format sf, ce qui nous permet d'utiliser le package mapsf [@mapsf] pour les prévisualiser :
 
 ```{r}
+# Chargement des données géographiques sur les EPCI
 library(sf)
 library(mapsf)
 shp_path <- here("data", "EPCI.shp")
@@ -219,7 +215,7 @@ mf_map(x = data_immo[is.na(data_immo$prix_med),], col = 'red', add = TRUE)
 ```
 
 <div class="alert alert-warning" role="alert">
-  Les EPCI manquants de la petite couronne parisienne sont en réalité également compris dna l'EPCI Métropole du Grand Paris. On peut donc avoir un découpage plus précis des EPCI de la petite couronne (en rouge sur la carte précédente) ou les intégrer à un EPCI plus large qui tient compte de Paris intra-muros et de la la petite couronne. C'est ce dernier que nous utiliserons pour les analyses.
+Les EPCI manquants de la petite couronne parisienne sont en réalité également compris dans l'EPCI Métropole du Grand Paris. On peut donc avoir un découpage plus précis des EPCI de la petite couronne (en rouge sur la carte précédente) ou les intégrer à un EPCI plus large qui tient compte de Paris intra-muros et de la la petite couronne. C'est ce dernier que nous utiliserons pour les analyses.
   
 </div>
 
@@ -242,7 +238,7 @@ neighbours_epci <- poly2nb(data_immo, queen = TRUE)
 neighbours_epci_w <- nb2listw(neighbours_epci)
 ```
 
-## Etape 1 : Exploration des variables
+## Étape 1 : exploration des variables
 
 Cette première étape d'exploration est fondamentale. Elle permet une première approche des données et d'entamer une réflexion sur nos données, leur distribution, la présence d'éventuels individus extrêmes...
 
@@ -280,15 +276,16 @@ fig = subplot(a, b, c, d, e, f, g, h, nrows = 2)
 fig
 ```
 
-Dans notre cas ici sur le prix median on peut se poser la question de conserver dans notre jeu de données l'entité spatiale avec un prix médian à plus de 10000, qui est visiblement un outlier.
+Dans notre cas ici sur le prix médian on peut se poser la question de conserver dans notre jeu de données l'entité spatiale avec un prix médian à plus de 10000, qui est visiblement un outlier.
 
-## Etape 2 : étude des corrélations
+## Étape 2 : étude des corrélations
 
 ### Micro rappel théorique
 
 **La corrélation permet d'étudier le lien, la relation entre deux variables.**
 
 La corrélation repose sur la covariance entre les variables.
+
 Quand 2 variables covarient, un écart à la moyenne d'une variable est accompagné par un écart dans le même sens (corrélation positive) ou dans le sens opposé (corrélation négative) pour le même individu de l'autre variable. Dit autrement, lorsque deux variables covarient, pour chaque valeur qui s'écarte de la moyenne, on s'attend à trouver un écart à la moyenne pour l'autre variable.
 
 Une corrélation est nécessairement comprise entre 1 et -1.
@@ -304,8 +301,9 @@ knitr::include_graphics("images/lecture_correlation.png")
 ```
 
 
-L'analyse de corrélation présente plusieurs intérêts. Le premier étant bien sur d'étudier les relations entre les variables, ce qui en soit peut s'avérer très intéressant.
-Ensuite, la conception d'un modèle doit absolument être le fruit d'une réflexion portant sur le choix des variables indépendantes (explicatives) et le choix de la méthode de régression. Et pour définir un modèle de régression certaine règles doivent (dans un monde parfait) être respectées. L'étude des corrélations peut donc apporter une aide précieuse dans cette réflexion. Elle pourra nous aider dans le choix des variables à intégrer au modèle, et dans le même temps à vérifier certaines des conditions de réalisation de notre régression.
+L'analyse de corrélation présente plusieurs intérêts. Le premier étant bien sûr d'étudier les relations entre les variables, ce qui en soit peut s'avérer très intéressant.
+
+Ensuite, la conception d'un modèle doit absolument être le fruit d'une réflexion portant sur le choix des variables indépendantes (explicatives) et le choix de la méthode de régression. Et pour définir un modèle de régression certaines règles doivent (dans un monde parfait) être respectées. L'étude des corrélations peut donc apporter une aide précieuse dans cette réflexion. Elle pourra nous aider dans le choix des variables à intégrer au modèle, et dans le même temps à vérifier certaines des conditions de réalisation de notre régression.
 
 Ainsi, une analyse des corrélations pourra vérifier :
 
@@ -313,7 +311,7 @@ Ainsi, une analyse des corrélations pourra vérifier :
 - la multicolinéarité des variables indépendantes. Les corrélations ne doivent pas être trop fortes entre nos VI. Un coefficient > 0.7 en valeurs absolues doit entraîner la suppression des variables concernés. Cela peut aussi être vérifié très efficacement avec le VIF (Variance Inflation Factor) mais peut se faire seulement après avoir lancé notre modèle.
 - L'absence de corrélation entre les variables explicatives du modèle et les variables externes. En effet, les variables d'influence doivent être incluses dans le modèle (sauf dans le cas où cela induirait une trop grande multicolinéarité).
 
-Pour calculer nos corrélation nous utiliserons le package bien nommé `correlation`. Ce package présente de nombreux avantages, comme plusieurs manière de présenter nos résultats (base de données, matrice...). Il intégre par défault des tests de corrections qui permettent des calculs plus robustes, il est compatible avec la méthode bayesienne, propose un grand nombre de méthode différentes...
+Pour calculer nos corrélations nous utiliserons le package bien nommé `correlation`. Ce package présente de nombreux avantages, comme plusieurs manière de présenter nos résultats (base de données, matrice...). Il intègre par défaut des tests de corrections qui permettent des calculs plus robustes, il est compatible avec la méthode bayesienne, propose un grand nombre de méthodes différentes...
 
 <div class="alert alert-warning" role="alert">
 Attention ici nos données exemple sont "parfaites", nous avons des données quantitatives qui marchent très bien pour cet atelier. Avec d'autre données il faudra veiller à se renseigner sur les différents arguments de la fonction `correlation`. Pour en savoir plus vous pouvez éventuellement vous référer au site [Rzine](https://rzine.fr/){target="_blank"} et notamment la fiche [Analyse des corrélations avec easystats, Guide pratique avec R.](https://rzine.fr/docs/20200526_glecampion_initiation_aux_correlations/index.html) [@easystats]
@@ -321,7 +319,7 @@ Attention ici nos données exemple sont "parfaites", nous avons des données qua
 
 ### Réalisation des correlations avec R
 
-L'analyse se lance simplement avec ces lignes de codes:
+L'analyse se lance simplement avec ces lignes de code :
 
 ```{r}
 library(correlation)
@@ -331,7 +329,7 @@ immo_cor <- correlation(data_cor)
 
 ```
 
-Un des avantages de l'analyse de corrélations c'est que les résultats sont facilement interprétables et accessible de beaucoup de manière différentes
+Un des avantages de l'analyse de corrélations est que les résultats sont facilement interprétables et accessibles de beaucoup de manière différentes.
 
 ```{r}
 
@@ -342,7 +340,7 @@ datatable(head(immo_cor, 10))
 summary(immo_cor)
 ```
 
-On peut aussi visualiser les corrélations de nombreuses manières différentes, il y a le classique scatter plot pour visualier la relation entre deux variables mais pour représenter notre matrice la figure classique est le corrélogramme :
+On peut aussi visualiser les corrélations de nombreuses manières différentes, il y a le classique scatter plot pour visualiser la relation entre deux variables mais pour représenter notre matrice la figure classique est le corrélogramme :
 
 1. Méthode simple avec le package `see`
 ```{r}
@@ -354,10 +352,10 @@ immo_cor %>%
 
 ```
 
-2. Méthode plus complexe avec le package `corrplot` mais permet d'avantage de personnalisation
+2. Méthode plus complexe avec le package `corrplot` mais permet davantage de personnalisation
 ```{r, out.width="960px",out.height="700px", fig.align = 'center'}
 
-#création d'une matrice redondante
+# création d'une matrice redondante
 mat_cor_comp <- summary(immo_cor, redundant = TRUE)
 # Nom des lignes = valeurs de la première colonne ("Parameter")
 rownames(mat_cor_comp ) <- mat_cor_comp[,1]
@@ -392,7 +390,7 @@ La représentation sous forme de réseau peut être très intéressante notammen
 
 ```{r warning=FALSE}
 
-library(ggraph) # needs to be loaded
+library(ggraph)
 
 immo_cor$val <-if_else(
   immo_cor$r>0, "positif", "négatif"
@@ -419,9 +417,9 @@ ggplot(data_immo, aes(x=log(perc_log_vac), y=log(prix_med))) +
   geom_point() + geom_smooth()
 ```
 
-Le nuage de point est l'autre représentation standard des corrélation. Il s'agit ici d'analyse la forme du nuage pour avoir une information sur la corrélation. Cette relation n'est pas la simple à lire mais ce qu'il faut retenir c'est plus vos points sont regroupé autour de la droute de régession plus il y a de la chance que la corrélation soit significative. La forme du nuage nous donnera le signe de la corrélation. Un nuage qui part d'en bas à gauche vers en haut à droite aura une corrélation positive et un nuage qui va d'en haut à gauche vers en bas à droite aura une corrélation négative.
+Le nuage de points est l'autre représentation standard des corrélations. Il s'agit ici d'analyser la forme du nuage pour avoir une information sur la corrélation. Cette relation n'est pas la plus simple à lire mais ce qu'il faut retenir c'est plus vos points sont regroupés autour de la droite de régression plus il y a de la chance que la corrélation soit significative. La forme du nuage nous donnera le signe de la corrélation. Un nuage qui part d'en bas à gauche vers en haut à droite aura une corrélation positive et un nuage qui va d'en haut à gauche vers en bas à droite aura une corrélation négative.
 
-Mais ce qui serait plus intéressant serait une représentation de notre VDvis à vis de toutes nos VI. On peut utiliser alors un diagramme en barres.
+Mais ce qui serait plus intéressant serait une représentation de notre VD vis à vis de toutes nos VI. On peut utiliser alors un diagramme en barres.
 
 ```{r warning=FALSE}
 library(corrr)
@@ -443,7 +441,7 @@ ggplot(hist_cor, aes(x = reorder(term, prix_med), y = prix_med, fill = correlati
 
 ```
 
-## Etape 3 : Régression linéaire ou Méthode des moindre carrés ordinaire (MCO)
+## Étape 3 : régression linéaire ou méthode des Moindres Carrés Ordinaire (MCO)
 
 ### Micro rappel sur la régression
 
@@ -457,18 +455,18 @@ Où $a$ est le coefficient associé à la variable du pourcentage de logements v
 
 <br> 
 
-Traditionnellement on va faire usage d'une régression linéaire lorsque l'on veut prédire les valeurs de notre VD dans les cas où elle n'aurait pas été mesurée, ou bien si l'on souhaite comprendre les relations statistiques entre les variables. Comment le sprédicteurs vont expliquer notre variable dépendante.
+Traditionnellement on va faire usage d'une régression linéaire lorsque l'on veut prédire les valeurs de notre VD dans les cas où elle n'aurait pas été mesurée, ou bien si l'on souhaite comprendre les relations statistiques entre les variables. Comment les prédicteurs vont expliquer notre variable dépendante.
 
 
-Pour lancer notre modèle de régression linéaire, on va utiliser la fonction [lm()](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/lm) dont les 2 lettres sont l'acronyme de *linear model* :
+Pour lancer notre modèle de régression linéaire, on va utiliser la fonction [lm()](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/lm) dont les 2 lettres sont l'acronyme de *linear model*.
 
 <div class="alert alert-warning" role="alert">
-Il existe un très grand nombre de modèle de régression, le choix dépendra de vos données et de ce que vous voulez faire.
+Il existe un très grand nombre de modèles de régression, le choix dépendra de vos données et de ce que vous voulez faire.
 </div>
 
 Sur R la réalisation d'un modèle de régression linéaire se fait très simplement :
 ```{r}
-# Dans le fonctionnement sur R il est important de stocker la régression dans un objet.
+# Dans le fonctionnement sur R il est important de stocker la régression dans un objet
 mod.lm <- lm(formula = prix_med ~ perc_log_vac + perc_maison + perc_tiny_log + dens_pop + med_niveau_vis + part_log_suroccup + part_agri_nb_emploi + part_cadre_profintellec_nbemploi, 
              data = data_immo)
 
@@ -476,18 +474,19 @@ mod.lm <- lm(formula = prix_med ~ perc_log_vac + perc_maison + perc_tiny_log + d
 summary(mod.lm)
 ```
 
-Une des fonction les plus utile dans tout l'écosystème R est la fonction `summary()`, ici pour notre régression elle va nous fournir tous les élément utile à l'interprétation. Voci donc ce qu'elle nous sort :
+Une des fonctions les plus utiles dans tout l'écosystème R est la fonction `summary()`, ici pour notre régression elle va nous fournir tous les éléments utiles à l'interprétation. Voici donc ce qu'elle renvoie :
 
 - Call : la fomule du modèle ;
 - Residuals : des statistiques descriptives des résidus ;
-- Coefficients : un tableau à deux entrées où les lignes correspondent aux coefficients associés aux variables explicatives, et les colonnes, dans l’ordre, à l’estimation du coefficient, l’écart-type estimé, la valeur du test de Student de nullité statistique du coefficient et enfin la p-value associé à ce test, suivie d’un symbole pour lire rapidement la significativité;
+- Coefficients : un tableau à deux entrées où les lignes correspondent aux coefficients associés aux variables explicatives, et les colonnes, dans l'ordre, à l'estimation du coefficient, l'écart-type estimé, la valeur du test de Student de nullité statistique du coefficient et enfin la p-value associé à ce test, suivie d'un symbole pour lire rapidement la significativité;
 - Signif. codes : les significations des symboles de niveau de significativité ;
-- Residual standard error : estimation de l’écart-type de l’aléa et degré de liberté ;
+- Residual standard error : estimation de l'écart-type de l'aléa et degré de liberté ;
 - Multiple R-squared : coefficient de détermination ;
 - Adjusted R-squared : coefficient de détermination ajusté ;
 - F-statistic : valeur de la statistique de Fisher du test de significativité globale, ainsi que les degrés de liberté et la p-value associée au test.
 
-Pour visualiser les résultats des tests statistiques il existent un grand nombre de package et de fonctions. On peut citer par exemple la fonction `tbl_regression` du package gtsummary  ou la fonction `model_parameters` du package `parameters`.
+Pour visualiser les résultats des tests statistiques il existe un grand nombre de packages et de fonctions. On peut citer par exemple la fonction `tbl_regression` du package gtsummary  ou la fonction `model_parameters` du package `parameters`.
+
 ```{r}
 library(gtsummary)
 mod.lm %>%
@@ -503,10 +502,9 @@ GGally::ggcoef_model(mod.lm)
 
 ```
 
-Faire une régression linéaire sur R c'est finalement très simple ! Mais le vrai enjeux c'est l'interprétation des résultats !
+Faire une régression linéaire sur R c'est finalement très simple ! Mais le vrai enjeu c'est l'interprétation des résultats !
 
 ### Interpréter les résultats
-
 
 Pour interpréter les résultats plusieurs éléments fournis par la commande `summary(mod.lm)` sont importants.
 
@@ -528,53 +526,56 @@ La $t-value$ est le coefficient divisé par son erreur standard. Plus ce quotien
 
 <div class="alert alert-danger" role="alert">
 Nous sommes ici dans le cas d'une régression linéaire multiple avec donc plusieurs prédicteurs.
+
 Or dans la régression linéaire les effets des variables explicatives sont considérés comme "purs", la lecture des effets de chaque VI doit se faire selon un principe de "toutes choses égales par ailleurs".
 <hr>
 Ainsi, le pourcentage de logements vacant a un effet sur le prix médian toutes choses égales quant aux autres variables explicatives.
 <hr>
-On peut bien sur aller au delà de ce raisonnement, à l'aide de méthode plus complexe.
-Mais c'est aussi possible dans le cadre d'un modèle linéaire au sein duquel on peut étudier l'intéraction entre des prédicteurs. Rajouter une intéraction se fait très simplement en metant une * entre deux variable.
+On peut bien sur aller au delà de ce raisonnement, à l'aide de méthodes plus complexe.
+Mais c'est aussi possible dans le cadre d'un modèle linéaire au sein duquel on peut étudier l'interaction entre des prédicteurs. Rajouter une interaction se fait très simplement en mettant une * entre deux variables.
+
 Par exemple, dans notre cas si nous souhaitons étudier en plus l'interaction entre la densité et le niveau de vie médian nous rajoutons à notre modèle `dens_pop*med_niveau_vis`.
 <hr>
-On peut aussi envisager les méthodes de médiation et de modération. Il existent de très nombreux tutoriel sur ce sujet, et cela fonctionne très bien avec R.
+On peut aussi envisager les méthodes de médiation et de modération. Il existent de très nombreux tutoriels sur ce sujet, et cela fonctionne très bien avec R.
 </div>
 
 Finalement tout va pour le mieux dans le meilleur des mondes ! On a donc pu réaliser notre régression et interpréter les résultats. Mais en réalité, nous avons pas abordé le point le plus sensible lorsque l'on réalise un modèle de régression linéaire.
-Notre modèle est-il viable ? Les conditions nécessaire d'application sont-elle respecté ? Et c'est bien là le plus dure dans la régression.
+
+Notre modèle est-il viable ? Les conditions nécessaire d'application sont-elle respectées ? Et c'est bien là le plus dur dans la régression.
 
 ## Diagnostic du modèle
 
-Les prémisses ou condition à vérifier dans le cadre de la réalisation d'un modèle linéaire multiple sont très nombreuses , en voici la liste : 
+Les prémisses ou conditions à vérifier dans le cadre de la réalisation d'un modèle linéaire multiple sont très nombreuses, en voici la liste : 
 
 1. Les types de variables à utiliser : continue ou catégorielle (ordinale ou dichotomique) pour nos prédicteurs, continue pour notre variable à prédire.
 
 2. Pas de variance égale à zéro : la distribution des prédicteurs doit comprendre une certaine variance, donc ne doit pas être constante.
 
-3. Aucune multicolinéarité parfaite : il ne doit pas y avoir de relation linéaire parfaite entre deux ou plusieurs variables indépendantes. Par conséquent, les corrélations ne doivent pas être trop fortes entre celles-ci. Cette prémisse peut être vérifiée avec le VIF (Variance Inflation Factor) indiquant si une variable indépendante a une une relation linéaire forte avec les autres.
+3. Aucune multicolinéarité parfaite : il ne doit pas y avoir de relation linéaire parfaite entre deux ou plusieurs variables indépendantes. Par conséquent, les corrélations ne doivent pas être trop fortes entre celles-ci. Cette prémisse peut être vérifiée avec le VIF (Variance Inflation Factor) indiquant si une variable indépendante a une relation linéaire forte avec les autres.
 
-4. Pas de corrélation entre les variables indépendantes et les variables externes : les variables d’influence doivent toutes être incluses dans le modèle.
+4. Pas de corrélation entre les variables indépendantes et les variables externes : les variables d'influence doivent toutes être incluses dans le modèle.
 
-5. Homéocédasticité (homogénéité des variances des résiduels) : la variance des valeurs résiduelles doit être similaire à tous les niveaux de la variable indépendante.
+5. Homoscédasticité (homogénéité des variances des résiduels) : la variance des valeurs résiduelles doit être similaire à tous les niveaux de la variable indépendante.
 
 6. Indépendance des erreurs : les valeurs résiduelles ne doivent pas être corrélées entre les individus. Cette prémisse peut être vérifiée avec la statistique Durbin-Watson qui se situe entre 0 et 4, une valeur de 2 indiquant une absence de corrélation, moins de 2 une corrélation positive et plus de 2, une corrélation négative. La règle arbitraire cette fois est que la valeur ne doit pas être plus petite que 1 ou plus grande que 3.
 
-7. Distribution normale des résidus : bien que les variables indépendantes ne doivent pas nécessairement suivre une distribution normale, il importe que les résiduels en suivent une. Ils doivent donc avoir une moyenne de 0, la majorité des valeurs doivent s’en rapprocher. Cette prémisse peut être vérifiée en enregistrant les valeurs résiduelles dans la base de données et en effectuant le test de Kolmogorov-Smirnov ou de Shapiro-Wilks. Vous devez vous assurer que le test n’est pas significatif pour conserver l’hypothèse nulle de distribution normale.
+7. Distribution normale des résidus : bien que les variables indépendantes ne doivent pas nécessairement suivre une distribution normale, il importe que les résiduels en suivent une. Ils doivent donc avoir une moyenne de 0, la majorité des valeurs doivent s'en rapprocher. Cette prémisse peut être vérifiée en enregistrant les valeurs résiduelles dans la base de données et en effectuant le test de Kolmogorov-Smirnov ou de Shapiro-Wilks. Vous devez vous assurer que le test n'est pas significatif pour conserver l'hypothèse nulle de distribution normale.
 
-8. Indépendance de la variable prédite : toutes les observations formant la distribution des valeurs de la variable dépendante sont indépendantes, viennent d’un individu différent.
+8. Indépendance de la variable prédite : toutes les observations formant la distribution des valeurs de la variable dépendante sont indépendantes, viennent d'un individu différent.
 
-9. Relation linéaire entre les variables indépendantes et la variable dépendante : la variation de la variable dépendante pour chaque augmentation d’une unité d’une variable indépendante suit une ligne droite.
+9. Relation linéaire entre les variables indépendantes et la variable dépendante : la variation de la variable dépendante pour chaque augmentation d'une unité d'une variable indépendante suit une ligne droite.
 
 
-En SHS, il est rare de voir toutes les conitions entiérement respectées, on va même trouvé des différence disciplinaire (par exemple sur le seuil acceptable de la multicolinéarité) ceci dit certaines conditions sont plus importantes que d'autre car non respectées elles peuvent vraiment venir perturber significativement votre modèle votre modèle. Il est de toute manière toujours bon d'avoir ces informations sur vos données.
+En SHS, il est rare de voir toutes les conditions entièrement respectées, on va même trouver des différences disciplinaires (par exemple sur le seuil acceptable de la multicolinéarité), ceci dit certaines conditions sont plus importantes que d'autres car non respectées elles peuvent vraiment venir perturber significativement votre modèle. Il est de toute manière toujours bon d'avoir ces informations sur vos données.
 
 ### La Multicolinéarité
 
-Un des enjeux les plus important dans le cadre de régression multiple est de vérifier la multicolinéarité entre les variables explicatives. Le risque d'une trop grande colinéarité est de biaiser le modèle et notamment de biaiser les estimations des erreurs type des coefficient de régression (et donc les t-value et p-value).
+Un des enjeux les plus importants dans le cadre de régression multiple est de vérifier la multicolinéarité entre les variables explicatives. Le risque d'une trop grande colinéarité est de biaiser le modèle et notamment de biaiser les estimations des erreurs type des coefficient de régression (et donc les t-value et p-value).
 
-L'analyse préalable des corrélations donne déjà de forte présemption sur un risuqe de multicolinéarité mais attention il ne faut pas confondre la multicolinéarité avec une "forte corrélation brutes" entre les prédicteurs. La multicolinéarité entre deux prédicteurs peut survenir lorsqu'une troisième variable non observée a un effet causal sur chacun des deux prédicteurs associés au résultat. Dans de tels cas, la relation réelle qui compte serait l’association entre la variable non observée et le résultat.
+L'analyse préalable des corrélations donne déjà de forte présomption sur un risque de multicolinéarité mais attention il ne faut pas confondre la multicolinéarité avec une "forte corrélation brute" entre les prédicteurs. La multicolinéarité entre deux prédicteurs peut survenir lorsqu'une troisième variable non observée a un effet causal sur chacun des deux prédicteurs associés au résultat. Dans de tels cas, la relation réelle qui compte serait l'association entre la variable non observée et le résultat.
 
-La **VIF (Variance Inflation Factor)** est une très bonne méthode pour vérifier et peut être confirmer les risques de multicolinéarité. Elle suppose simplement d'avoir estimé un premier modèle pour être utilisée.
-Cela se fait très simplement sur R, je vus montre plusieurs manière de le faire à vous de choisir celle que vous préférez.
+La **VIF (Variance Inflation Factor)** est une très bonne méthode pour vérifier et peut-être confirmer les risques de multicolinéarité. Elle suppose simplement d'avoir estimé un premier modèle pour être utilisée.
+Cela se fait très simplement sur R, je vus montre plusieurs manière de le faire, à vous de choisir celle que vous préférez.
 
 ```{r}
 # Avec la librairie "car"
@@ -588,7 +589,7 @@ library(performance)
 
 check_collinearity(mod.lm)
 
-# On peut aussi directement l'ajouter au résumé des coefficient obtenu avec gtsummary
+# On peut aussi directement l'ajouter au résumé des coefficients obtenu avec gtsummary
 
 library(gtsummary)
 
@@ -601,6 +602,7 @@ mod.lm %>%
 
 <div class="alert alert-danger" role="alert">
 Je n'ai pas trouvé dans la littérature de "loi" indiquant le seuil absolu de VIF à ne pas dépasser. Les sources en SHS varient en fonction des disciplines : certaines proposent 5 et d'autres 10. Malgré tout, en géographie le consensus est autour d'une valeur critique de 4. Un VIF supérieur à 4 devrait entraîner la suppression de la variable du modèle car cela implique une forte colinéarité et donc un risque élevé de biaiser le modèle. A partir de 3 il convient de s'interroger sur la présence de la variable.
+
 Ceci dit la suppression de variables très multicolinéaire d'un modèle est elle même source de discussion.
 Au delà de la suppression ou non des variables concernées, il est de toute façon très important de pouvoir identifier les variables à VIF élevés.
 </div>
@@ -615,7 +617,7 @@ library(car)
 score_vif <- vif(mod.lm)
 
 barplot(score_vif, main = "VIF Values", horiz = TRUE, col = "steelblue", las=2)
-#ajout du seuil de 4
+# ajout du seuil de 4
 abline(v = 4, lwd = 3, lty = 2)
 # et de la limite de 3
 abline(v = 3, lwd = 3, lty = 2)
@@ -629,7 +631,7 @@ plot(colinearite)
 
 **Comment gérer la multicolinéarité ?**
 
-Nous avons en effet une forte multicolinéarité entre certaines de nos variables explicatives. Selon le VIF nous devrions donc relancer notre modèle sans les variables fortement colinéaires, c'est à dire sans le pourcentage de logements sur-occupés et sans le pourcentage de petits logements.
+Nous avons en effet une forte multicolinéarité entre certaines de nos variables explicatives. Selon le VIF nous devrions donc relancer notre modèle sans les variables fortement colinéaires, c'est-à-dire sans le pourcentage de logements sur-occupés et sans le pourcentage de petits logements.
 
 Normalement, il est d'usage de retirer ces variables de notre modèle. Voyons ce qui se passe.
 Pour commencer, on peut retirer du modèle la variable ayant le VIF le plus élevé à savoir le pourcentage de petits logements.
@@ -650,11 +652,12 @@ mod.lm2 %>%
 GGally::ggcoef_model(mod.lm2)
 ```
 
-On note qu'au niveau global il y a peu de changements : le $R^2$ a très légèrement baissé, on passe d'une variation expliquée à 77% à un taux d'explication de 76% et le modèle est toujours significatif. Les changement les plus importants se situent au niveau des effets partiels. L'effet de la part de cadre et de professions intellectuelles dans le nombre d'emploi sur le prix médian du logement est devenu significatif et on constate même que le VIF du pourcentage de logement sur-occupés est passé sous le seuil critique.
+On note qu'au niveau global il y a peu de changements : le $R^2$ a très légèrement baissé, on passe d'une variation expliquée à 77% à un taux d'explication de 76% et le modèle est toujours significatif. Les changements les plus importants se situent au niveau des effets partiels. L'effet de la part de cadres et de professions intellectuelles dans le nombre d'emploi sur le prix médian du logement est devenu significatif et on constate même que le VIF du pourcentage de logement sur-occupés est passé sous le seuil critique.
 
-#### Aparté sur le Principe de parcimonie
+#### Aparté sur le principe de parcimonie
 
-Lorsque l'on conçoit un modèle en statistique il faut obéir au principe de parcimonie. Ce principe implique qu'un bon modèle a un nombre optimal de variables. En bref, qu'il ne faut pas intégrer nécessairement toutes les variables disponibles mais ne conserver que les variables d'intérêts.
+Lorsque l'on conçoit un modèle en statistique il faut obéir au principe de parcimonie. Ce principe implique qu'un bon modèle a un nombre optimal de variables. En bref, il ne faut pas intégrer nécessairement toutes les variables disponibles mais ne conserver que les variables d'intérêts.
+
 Ce principe veut donc que nous retirions de notre 2ème modèle la variable *part d'agriculteurs dans le nombre d'emploi*, ou les variables non significatives ou à VIF trop élevés de notre premier modèle.
 
 L'objectif étant d'avoir le modèle le plus efficient ou performant.
@@ -662,7 +665,7 @@ L'objectif étant d'avoir le modèle le plus efficient ou performant.
 R peut nous aider efficacement dans cette tâche de sélection du meilleurs modèle.
 
 La fonction `step()` permet de réaliser une régression pas à pas descendante (ou ascendante ou les deux).
-Dans le cas d'une régression descendante, le modèle initial comprend toutes les variables, comme pour la régression standard mais cette fois l'algorithme va retirer la variable ayant la plus faible contribution au modèle si la variation du $R^2$ n'est pas significative en l'éliminant. La procédure va être répétée jusqu'à ce que toutes les variables conservées contribuent significativement à l'amélioration du R2. La régression descendante va donc retirer les variables non significatives une à une. Ainsi, le dernier modèle proposé doit contenir toutes les variables ayant une contribution significative au $R^2$.
+Dans le cas d'une régression descendante, le modèle initial comprend toutes les variables, comme pour la régression standard mais cette fois l'algorithme va retirer la variable ayant la plus faible contribution au modèle si la variation du $R^2$ n'est pas significative en l'éliminant. La procédure va être répétée jusqu'à ce que toutes les variables conservées contribuent significativement à l'amélioration du $R^2$. La régression descendante va donc retirer les variables non significatives une à une. Ainsi, le dernier modèle proposé doit contenir toutes les variables ayant une contribution significative au $R^2$.
 
 ```{r}
 step(mod.lm2, direction = "backward")
@@ -681,7 +684,7 @@ mod.lm3 <- lm(formula = prix_med ~ perc_log_vac + perc_maison + dens_pop + med_n
 De manière générale, on suggère qu’un modèle bien balisée par la théorie devrait utiliser une stratégie globale, donc plutôt descendante. En revanche, dans une approche exploratoire l'approche ascendante ou stepwise peuvent être intéressantes.
 </div>
 
-Une aure manière de faire qui peut être très intéressante c'est de comparer les performances de nos différents modèles, ils existent des indicateurs statistiques qui peuvent nous aider.
+Une autre manière de faire qui peut être très intéressante est de comparer les performances de nos différents modèles, il existe des indicateurs statistiques qui peuvent nous aider.
 
 ```{r}
 library(performance)
@@ -691,8 +694,9 @@ print_md(perf)
 ```
 
 
-Lorsque vous comparez différents ajustements de modèles, vous souhaitez choisir un modèle qui a une valeur R2 élevée (une mesure de la variance expliquée par les prédicteurs), de faibles valeurs AIC et BIC et une faible RMSE.
-On peut bien sur représenter graphiquement ces indicateurs. Mais attention sur cette représentation qui représente pas le score de ces indicateurs mais le rang des modéles sur chacun de ces indicateurs.
+Lorsque vous comparez différents ajustements de modèles, vous souhaitez choisir un modèle qui a une valeur $R^2$ élevée (une mesure de la variance expliquée par les prédicteurs), de faibles valeurs AIC et BIC et une faible RMSE.
+
+On peut bien sur représenter graphiquement ces indicateurs. Mais attention sur cette représentation qui ne représente pas le score de ces indicateurs mais le rang des modèles sur chacun de ces indicateurs.
 
 ```{r}
 library(see)
@@ -717,6 +721,7 @@ Les 3 conditions qui concernent les résidus sont :
 
 <div class="alert alert-success" role="alert">
 Soyons clair, lorsque la démarche est de simplement réaliser une étude de modèle linéaire, il est rare de voir des articles en SHS où ces trois conditions sont étudiées ou validées. C'est pourtant important même s'il faut reconnaître que les types de données en SHS remplissent pas toujours ces conditions.
+
 Ceci dit, dans une démarche qui s'arrêterait au modèle linéaire s'il y en a une des 3 conditions qui devrait être vérifier ce serait plutôt la normalité des résidus.
 </div>
 
@@ -725,7 +730,6 @@ Pour obtenir les résidus :
 res_modlm <- mod.lm$residuals
 datatable(as.data.frame(res_modlm))
 ```
-
 
 Brutes de cette manière cela ne dit pas grand chose, il est nécessaire de les visualiser. De manière générale voici les graphiques que l'on voit fréquemment concernant les résidus en R base.
 
@@ -743,7 +747,8 @@ plot(rstudent(mod.lm)) # un graphique pour visualiser l'homoscédasticité des r
 knitr::include_graphics(here("images", "plot_res.png"))
 ```
 
-Lorsque graphiquement, il est compliqué de se prononcer, il est possible d'utiliser des tests statistqique qui ont pour objet soit la vérification de la normalité ou de tester l'homoscédasticité.
+Lorsque graphiquement, il est compliqué de se prononcer, il est possible d'utiliser des tests statistiques qui ont pour objet soit la vérification de la normalité soit de tester l'homoscédasticité.
+
 Ils ont cela de particulier qu'ici nous cherchons à accepter H0 et donc pour valider la normalité ou l'homoscédasticité il faut que $p-value > 0.05$
 
 ```{r}
@@ -759,7 +764,7 @@ Dans les deux cas il nous faut rejeter H0, les résidus n'ont donc pas une distr
 
 Le modèle ne peut donc pas être analysé en l'état. Le problème de l'hétéroscédasticité des résidus indique souvent un problème de spécification du modèle (par exemple une variable manquante).
 
-Le package `performance` peut une fois de plus être une alternative très intéressante et nous macher le travail. On pourra aisément tester ces conditions et les visualiser de manière moins aride qu'en R base. Ces fonctions fournissent des indicateurs d'aide à la décision qui sont plus claires. 
+Le package `performance` peut une fois de plus être une alternative très intéressante et nous mâcher le travail. On pourra aisément tester ces conditions et les visualiser de manière moins aride qu'en R base. Ces fonctions fournissent des indicateurs d'aide à la décision qui sont plus claires. 
 
 ```{r}
 
@@ -780,14 +785,16 @@ plot(ind_ext, type = "dots")
 ```
 
 <div class="alert alert-danger" role="alert">
-Attention, la fonction `check_outliers()` propose de nombreuses méthodes différentes pour identier les individus extrêmes.
-Par défaut, cette fonction utilise la distance de Cook qui considère l’effet d’un cas sur l’ensemble du modèle. Les valeurs très proche ouplus élevées que 1 doivent retenir l’attention. L'autre distance très utilisé (notamment dans le cas des analyse multidimensionnelle genre analyse factorielle) c'est la distance de Mahalanobis qui mesure la distance entre une observation et la moyenne des valeurs prédites. Le point de coupure indiquant une distance problématique dépend du nombre de prédicteurs et de la taille de l’échantillon.
+Attention, la fonction `check_outliers()` propose de nombreuses méthodes différentes pour identifier les individus extrêmes.
+
+Par défaut, cette fonction utilise la distance de Cook qui considère l'effet d'un cas sur l'ensemble du modèle. Les valeurs très proches ou plus élevées que 1 doivent retenir l'attention. L'autre distance très utilisée (notamment dans le cas des analyses multidimensionnelles genre analyse factorielle) c'est la distance de Mahalanobis qui mesure la distance entre une observation et la moyenne des valeurs prédites. Le point de coupure indiquant une distance problématique dépend du nombre de prédicteurs et de la taille de l'échantillon.
 </div>
 
 ### Apparté sur les outliers
 
 Lors de la modélisation statistique on passe énormément de temps à réfléchir aux variables, à comment ces dernières peuvent venir perturber notre modèle. Cependant, certains de nos individus peuvent eux aussi venir grandement influencer nos analyses : il s'agit des individus extrêmes ou outliers.
-LLes analyses que nous venons de faire nous indique globalement deux individus particulier, ici ceux ayant pour identifiant 266 et 36. Il peut dans certain cas être intéressant de supprimer ces individus et voir comment réagit le modèle.
+
+Les analyses que nous venons de faire nous indiquent globalement deux individus particuliers, ici ceux ayant pour identifiant 266 et 36. Il peut dans certain cas être intéressant de supprimer ces individus et voir comment réagit le modèle.
 
 ```{r}
 # Pour visualiser les individus concernés
@@ -820,7 +827,7 @@ Quoi qu'il en soit c'est une opération qui doit être effectuée avec prudence,
 
 ### L'autocorrélation des résidus
 
-C'est la condition qui pose en généralle le plus problème, car elle implique beaucoup de choses finalement sur nos données ou notre cadre de réflexions.
+C'est la condition qui pose en général le plus problème, car elle implique beaucoup de choses finalement sur nos données ou notre cadre de réflexions.
 
 Pour vérifier facilement s'il y a un quelconque risque d'auto-correlation :
 
@@ -828,13 +835,13 @@ Pour vérifier facilement s'il y a un quelconque risque d'auto-correlation :
 check_autocorrelation(mod.lm)
 ```
 
-Cependant, de cette manière on ne sait pas du tout de quel ordre est cette autocorrélation. Nos données étant spatialisé, il serait pertinent de vérifier spécifiquement le risque d'autocorrélation spatiale.
+Cependant, de cette manière on ne sait pas du tout de quel ordre est cette autocorrélation. Nos données étant spatialisées, il serait pertinent de vérifier spécifiquement le risque d'autocorrélation spatiale.
 
-Heureusement la géographie s'est doté d'outils pour mesurer notamment l'autocorrélation spatiale. En réalité ici nous espérons très fortement qu'il y ait une autocorrélation spatiale. Cela rendrait notre modèle linéaire classique caduc mais nous permettrait de justifier l'utilisation de la régression spatiale et donc cette seamaine d'ANF
+Heureusement la géographie s'est doté d'outils pour mesurer notamment l'autocorrélation spatiale. En réalité ici nous espérons très fortement qu'il y ait une autocorrélation spatiale. Cela rendrait notre modèle linéaire classique caduc mais nous permettrait de justifier l'utilisation de la régression spatiale et donc cette semaine d'ANF
 
 Les deux outils connus au moins de nom par tous les géographes sont le test de **Moran** et celui de **Geary**.
 
-Dans la littérature le test de Moran semble être préféré à celui de Geary en raison d'une stabilité plus grande, mais dans les faits les deux sont souvent associé
+Dans la littérature le test de Moran semble être préféré à celui de Geary en raison d'une stabilité plus grande, mais dans les faits les deux sont souvent associés.
 
 ```{r}
 # test de moran des residus de la régression H0: pas d'autocorrélation spatiale
@@ -892,7 +899,7 @@ Sur cette carte on voit très clairement une spatialisation des résidus, la dim
 
 ### Petit bonus
 
-Vous pouvez vérifier en une fois toutes les conditions de votre moèle de régression avec la fonction `check_model()`
+Vous pouvez vérifier en une fois toutes les conditions de votre modèle de régression avec la fonction `check_model()`
 
 ```{r}
 
