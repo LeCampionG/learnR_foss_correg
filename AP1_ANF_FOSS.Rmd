@@ -308,7 +308,7 @@ Ensuite, la conception d'un modèle doit absolument être le fruit d'une réflex
 Ainsi, une analyse des corrélations pourra vérifier :
 
 - l'existence d'un lien entre les variables indépendantes (VI) et la variable à étudier (VD). En effet dans une régression linéaire, il est nécessaire d'avoir une relation linéaire entre la VD et les différentes VI.
-- la multicolinéarité des variables indépendantes. Les corrélations ne doivent pas être trop fortes entre nos VI. Un coefficient > 0.7 en valeurs absolues doit entraîner la suppression des variables concernés. Cela peut aussi être vérifié très efficacement avec le VIF (Variance Inflation Factor) mais peut se faire seulement après avoir lancé notre modèle.
+- la multicolinéarité des variables indépendantes. Les corrélations ne doivent pas être trop fortes entre nos VI. Un coefficient > 0.7 en valeurs absolues doit entraîner la suppression des variables concernées. Cela peut aussi être vérifié très efficacement avec le VIF (Variance Inflation Factor) mais peut se faire seulement après avoir lancé notre modèle.
 - L'absence de corrélation entre les variables explicatives du modèle et les variables externes. En effet, les variables d'influence doivent être incluses dans le modèle (sauf dans le cas où cela induirait une trop grande multicolinéarité).
 
 Pour calculer nos corrélations nous utiliserons le package bien nommé `correlation`. Ce package présente de nombreux avantages, comme plusieurs manière de présenter nos résultats (base de données, matrice...). Il intègre par défaut des tests de corrections qui permettent des calculs plus robustes, il est compatible avec la méthode bayesienne, propose un grand nombre de méthodes différentes...
@@ -521,7 +521,7 @@ Ensuite, regardons ce qu'il se passe au niveau des variables explicatives :
 - La colonne $Pr(>|t|)$ correspond à la p-value associé à ce résultat. Une fois encore si elle est inférieure à $0.05$ alors on peut le considérer comme statistiquement significatif. Dans notre cas on peut dire que la part d'agriculteurs, de cadres et professions intellectuelles dans le nombre d'emploi n'ont pas un effet significatif sur le prix médian du logement.
 
 <div class="alert alert-success" role="alert">
-La $t-value$ est le coefficient divisé par son erreur standard. Plus ce quotient est proche de $0$ plus on peut considérer qu'il n'y a pas d'effet de notre VI sur notre VD. En revanche dans le cas où on aurait plus de 200 individus si $|t-value| > 1.96 $ alors on peut considérer qu'il y a $95\%$ de chance qu'il y ait un effet significatif de la VI sur la VD.
+La $t-value$ est le coefficient divisé par son erreur standard. Plus ce quotient est proche de $0$ plus on peut considérer qu'il n'y a pas d'effet de notre VI sur notre VD. En revanche dans le cas où on aurait plus de 200 individus si $|t-value| > 1.96$ alors on peut considérer qu'il y a $95\%$ de chance qu'il y ait un effet significatif de la VI sur la VD.
 </div>
 
 <div class="alert alert-danger" role="alert">
@@ -531,7 +531,7 @@ Or dans la régression linéaire les effets des variables explicatives sont cons
 <hr>
 Ainsi, le pourcentage de logements vacant a un effet sur le prix médian toutes choses égales quant aux autres variables explicatives.
 <hr>
-On peut bien sur aller au delà de ce raisonnement, à l'aide de méthodes plus complexe.
+On peut bien sur aller au delà de ce raisonnement, à l'aide de méthodes plus complexes.
 Mais c'est aussi possible dans le cadre d'un modèle linéaire au sein duquel on peut étudier l'interaction entre des prédicteurs. Rajouter une interaction se fait très simplement en mettant une * entre deux variables.
 
 Par exemple, dans notre cas si nous souhaitons étudier en plus l'interaction entre la densité et le niveau de vie médian nous rajoutons à notre modèle `dens_pop*med_niveau_vis`.
@@ -539,7 +539,7 @@ Par exemple, dans notre cas si nous souhaitons étudier en plus l'interaction en
 On peut aussi envisager les méthodes de médiation et de modération. Il existent de très nombreux tutoriels sur ce sujet, et cela fonctionne très bien avec R.
 </div>
 
-Finalement tout va pour le mieux dans le meilleur des mondes ! On a donc pu réaliser notre régression et interpréter les résultats. Mais en réalité, nous avons pas abordé le point le plus sensible lorsque l'on réalise un modèle de régression linéaire.
+Finalement tout va pour le mieux dans le meilleur des mondes ! On a donc pu réaliser notre régression et interpréter les résultats. Mais en réalité, nous n'avons pas abordé le point le plus sensible lorsque l'on réalise un modèle de régression linéaire.
 
 Notre modèle est-il viable ? Les conditions nécessaire d'application sont-elle respectées ? Et c'est bien là le plus dur dans la régression.
 
@@ -572,10 +572,10 @@ En SHS, il est rare de voir toutes les conditions entièrement respectées, on v
 
 Un des enjeux les plus importants dans le cadre de régression multiple est de vérifier la multicolinéarité entre les variables explicatives. Le risque d'une trop grande colinéarité est de biaiser le modèle et notamment de biaiser les estimations des erreurs type des coefficient de régression (et donc les t-value et p-value).
 
-L'analyse préalable des corrélations donne déjà de forte présomption sur un risque de multicolinéarité mais attention il ne faut pas confondre la multicolinéarité avec une "forte corrélation brute" entre les prédicteurs. La multicolinéarité entre deux prédicteurs peut survenir lorsqu'une troisième variable non observée a un effet causal sur chacun des deux prédicteurs associés au résultat. Dans de tels cas, la relation réelle qui compte serait l'association entre la variable non observée et le résultat.
+L'analyse préalable des corrélations donne déjà de fortes présomptions sur un risque de multicolinéarité mais attention il ne faut pas confondre la multicolinéarité avec une "forte corrélation brute" entre les prédicteurs. La multicolinéarité entre deux prédicteurs peut survenir lorsqu'une troisième variable non observée a un effet causal sur chacun des deux prédicteurs associés au résultat. Dans de tels cas, la relation réelle qui compte serait l'association entre la variable non observée et le résultat.
 
 La **VIF (Variance Inflation Factor)** est une très bonne méthode pour vérifier et peut-être confirmer les risques de multicolinéarité. Elle suppose simplement d'avoir estimé un premier modèle pour être utilisée.
-Cela se fait très simplement sur R, je vus montre plusieurs manière de le faire, à vous de choisir celle que vous préférez.
+Cela se fait très simplement sur R, je vous montre plusieurs manières de le faire, à vous de choisir celle que vous préférez.
 
 ```{r}
 # Avec la librairie "car"
@@ -583,7 +583,8 @@ library(car)
 
 vif(mod.lm)
 
-# Avec la librairie "performance" de la suite easystats qui propose beaucoup de choses globalement pour vous faciliter la vie si vous faites de la modélisation statistique. Toutefois attention ce sont plutôt des psychologues qui en sont à l'origine et ce sont donc plutôt leurs normes disciplinaires.
+# Avec la librairie "performance" de la suite easystats qui propose beaucoup de choses globalement pour vous faciliter la vie si vous faites de la modélisation statistique
+# Toutefois attention ce sont plutôt des psychologues qui en sont à l'origine et ce sont donc plutôt leurs normes disciplinaires.
 
 library(performance)
 
@@ -722,7 +723,7 @@ Les 3 conditions qui concernent les résidus sont :
 <div class="alert alert-success" role="alert">
 Soyons clair, lorsque la démarche est de simplement réaliser une étude de modèle linéaire, il est rare de voir des articles en SHS où ces trois conditions sont étudiées ou validées. C'est pourtant important même s'il faut reconnaître que les types de données en SHS remplissent pas toujours ces conditions.
 
-Ceci dit, dans une démarche qui s'arrêterait au modèle linéaire s'il y en a une des 3 conditions qui devrait être vérifier ce serait plutôt la normalité des résidus.
+Ceci dit, dans une démarche qui s'arrêterait au modèle linéaire, s'il y a une de ces 3 conditions qui devrait être vérifiée ce serait plutôt la normalité des résidus.
 </div>
 
 Pour obtenir les résidus :
@@ -731,7 +732,7 @@ res_modlm <- mod.lm$residuals
 datatable(as.data.frame(res_modlm))
 ```
 
-Brutes de cette manière cela ne dit pas grand chose, il est nécessaire de les visualiser. De manière générale voici les graphiques que l'on voit fréquemment concernant les résidus en R base.
+Bruts de cette manière cela ne dit pas grand chose, il est nécessaire de les visualiser. De manière générale voici les graphiques que l'on voit fréquemment concernant les résidus en R base.
 
 
 ```{r, eval=FALSE}
@@ -800,7 +801,8 @@ Les analyses que nous venons de faire nous indiquent globalement deux individus 
 # Pour visualiser les individus concernés
 data_immo[c(36, 266),]
 
-# Pour relancer un nouveau modèle sans l'individu le plus extrême. Notez que l'on peut en supprimer plusieurs d'un coup avec subset =-c(36,266)
+# Pour relancer un nouveau modèle sans l'individu le plus extrême
+# Notez que l'on peut en supprimer plusieurs d'un coup avec subset =-c(36,266)
 mod.lmx <- update(mod.lm, subset=-266)
 
 # Etudier le nouveau modèle
@@ -837,7 +839,7 @@ check_autocorrelation(mod.lm)
 
 Cependant, de cette manière on ne sait pas du tout de quel ordre est cette autocorrélation. Nos données étant spatialisées, il serait pertinent de vérifier spécifiquement le risque d'autocorrélation spatiale.
 
-Heureusement la géographie s'est doté d'outils pour mesurer notamment l'autocorrélation spatiale. En réalité ici nous espérons très fortement qu'il y ait une autocorrélation spatiale. Cela rendrait notre modèle linéaire classique caduc mais nous permettrait de justifier l'utilisation de la régression spatiale et donc cette semaine d'ANF
+Heureusement la géographie s'est dotée d'outils pour mesurer notamment l'autocorrélation spatiale. En réalité, ici nous espérons très fortement qu'il y ait une autocorrélation spatiale. Cela rendrait notre modèle linéaire classique caduc mais nous permettrait de justifier l'utilisation de la régression spatiale et donc cette semaine d'ANF.
 
 Les deux outils connus au moins de nom par tous les géographes sont le test de **Moran** et celui de **Geary**.
 
@@ -850,7 +852,8 @@ lm.morantest(model = mod.lm,
 
 # Test de Geary H0 pas d'autocorrélation.
 #  Attention : Pour avoir le  coefficient il faut faire 1-"Résultat test de Geary" (soit ici le coefficient est 0.67)
-# Le coefficient de Geary s'étend de 0 à 2, 1 étant le "0" et signifiant aucune corrélation. Par ailleurs, un score inférieur à 1 implique une corrélation positive et un score supérieur à 1 une corrélation négative.
+# Le coefficient de Geary s'étend de 0 à 2, 1 étant le "0" et signifiant aucune corrélation
+# Par ailleurs, un score inférieur à 1 implique une corrélation positive et un score supérieur à 1 une corrélation négative.
 geary(x = data_immo$prix_med, 
       listw = neighbours_epci_w,
       n = length(neighbours_epci), 
