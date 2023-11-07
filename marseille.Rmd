@@ -1,0 +1,581 @@
+---
+title: "Ici c'est Marseille!"
+description: "Atelier R sur la réalisation d'un modèle de régression linéaire multiple de l'analyse des corrélations au diagnostics du modèle."
+author: "Auteur : Grégoire Le Campion"
+date: "`r paste('Modifié le',format(Sys.time(), '%d %B %Y'))`"
+output:
+  learnr::tutorial:
+    includes:
+      in_header: header.html
+    css: css/custom_css.css
+    progressive: true
+    allow_skip: true
+    language: fr
+runtime: shiny_prerendered
+
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+
+tutorial_options(
+  exercise.timelimit = 60,
+  # A simple checker function that just returns the message in the check chunk
+  exercise.checker = function(check_code, ...) {
+    list(
+      message = eval(parse(text = check_code)),
+      correct = logical(0),
+      type = "info",
+      location = "append"
+    )
+  }
+)
+
+## Global options
+knitr::opts_chunk$set(echo=TRUE,
+                      eval=TRUE,
+                      error = TRUE,
+        	            cache=FALSE,
+                      prompt=FALSE,
+                      comment=NA,
+                      message=FALSE,
+                      warning=FALSE,
+                      class.source="bg-info",
+                      class.output="bg-warning")
+
+```
+
+## Introduction
+
+Application avec les données sur Marseille. Pour rappel on peut les télécharger ici
+<br>   
+<p class="center">[<span style="font-size: 230%;" class="glyphicon glyphicon-download-alt"></span> <br/> Télécharger les données Marseille](https://gitlab.in2p3.fr/letg/foss/data/-/raw/main/data_marseille.csv?inline=false){target="_blank"}</p>
+<br>
+
+## Présentation et chargement des données
+
+### Nos packages
+
+Voici la liste des packages que nous allons utiliser pour cet atelier :
+
+```{r, echo=TRUE}
+
+## Pour le chargement des données, leur visualisation et manipulation
+library(here)
+library(dplyr)
+library(DT)
+library(table1)
+library(sf)
+
+## Pour la réalisation des tests et analyse statistiques
+library(correlation)
+library(parameters)
+library(performance)
+# Ces trois packages peuvent être appellés en une fois avec library(easystats). Easystats est une suite de packages tournée vers la réalisation de statistique et offre un environnement de travail trè sdocumenté et intéressant.
+library(car)
+library(spdep)
+
+
+## Représentations graphiques
+library(plotly)
+library(RColorBrewer)
+library(ggplot2)
+library(ggraph)
+library(corrplot)
+library(GGally)
+library(gtsummary)
+library(see)
+library(corrr)
+
+## Représentation cartographique
+library(mapsf)
+
+
+```
+
+## Nos données
+
+### Présentation des données 
+
+##### Marseille
+
+Il s'agit des données de pauvreté par IRIS de la ville Marseille. Ces données proviennent de l'[INSEE](https://www.insee.fr/fr/statistiques/6049648){target="_blank"}
+
+*"L'IRIS Un sigle qui signifie « Ilots Regroupés pour l'Information Statistique » et qui fait référence à la taille visée de 2 000 habitants par maille élémentaire." Définition INSEE*
+
+Il contient les variables suivantes : 
+
+- id_IRIS : code IRIS
+- label_iris : nom de l'IRIS
+- code_insee : code INSEE de la commune
+- label_com : nom de la commune
+- tx_bas_revenu : taux de bas revenus déclarés au seuil de 60% (%) (variable DEC_TP6019 du fichier [BASE_TD_FILO_DEC_IRIS_2019.csv](https://www.insee.fr/fr/statistiques/6049648){target="_blank"})
+- PartPop_fr : 
+- hlm_res_princ : part /personne de résidences principales HLM loué vide en 2017 (%) (variable P17_RP_LOCHLMV du fichier [base-ic-logement-2017](https://www.insee.fr/fr/statistiques/4799305){target="_blank"})
+- unevoiture : part de ménages disposant au moins d'une voiture en 2017 (%) (variable P17_RP_VOIT1P du fichier [base-ic-logement-2017](https://www.insee.fr/fr/statistiques/4799305){target="_blank"})
+- res120plus : part de résidences principales de 120 m2 ou plus en 2017 (%) (variable P17_RP_120M2P du fichier [base-ic-logement-2017](https://www.insee.fr/fr/statistiques/4799305){target="_blank"})
+- masc_cadre : part d'hommes de 15 ans ou plus cadres et professions intellectuelles supérieures (%) (variable C17_H15P_CS3 du fichier [base-ic-evol-struct-pop-2017](https://www.insee.fr/fr/statistiques/4799309?sommaire=4658626){target="_blank"})
+- fem_noncadre : part de femmes de 15 ans ou plus autres sans activité professionnelle (variable C17_F15P_CS8 du fichier [base-ic-evol-struct-pop-2017](https://www.insee.fr/fr/statistiques/4799309?sommaire=4658626){target="_blank"})
+
+Attention, comme précédemment les variables qui peuvent constituer les prédicteurs ont été centrées-réduites (la variable tx_bas_revenu n'a pas été standardisée).
+
+### Chargement des données
+
+```{r chargement, exercise = FALSE, exercise.eval = FALSE}
+csv_path <- here("data", "data_marseille.csv")
+om_df <- read.csv2(csv_path)
+
+#Pour visualiser les données dans le doc
+datatable(head(om_df, 10))
+```
+
+
+### Chargement des données géographiques
+
+Pour télécharger les données c'est [ici](https://gitlab.in2p3.fr/letg/foss/data/){target="_blank"}, il suffit de cliquer sur ce bouton situer juste à côté de "cloner" : <p><img src="css/img/download.png" align='center' style='display:inline-block'>
+
+Nous utiliserons les fichiers nommés `IRIS13_GE`.
+```{r}
+library(sf)
+library(mapsf)
+shp_path <- here("data", "IRIS13_GE.shp")
+om_sf <- st_read(shp_path)
+# pour voir les données géographiques
+mf_map(x = om_sf)
+# et la table attributaire correspondante, avec le package DT
+datatable(head(om_sf, 10))
+```
+
+
+
+### Jointure des données géographiques et tabulaires
+
+Nous avons donc chargé nos données stats et spatiales, il nous reste désormais à réaliser la jointure.
+
+On peut visualiser simplement la différence entre nos fichiers en regardant leur nombre de lignes. Notre fichier joint devra avoir autant de lignes que notre fichier stat.
+
+```{r}
+nrow(om_df)
+nrow(om_sf)
+```
+
+Pour voir les IRIS qui n'ont pas de correspondance dans le tableau de données (On réalise la jointure avec la fonction `merge`) :
+
+```{r}
+data_marseille <- merge(x = om_sf, y = om_df, by.x = "CODE_IRIS", by.y = "id_IRIS", all.x = TRUE)
+# on peut filtrer les données de la jointure pour ne voir que les 55 iris n'ayant pas de correspondance dans le tableau om_df
+datatable(data_marseille[is.na(data_marseille$label_iris),])
+mf_map(x = data_marseille)
+mf_map(x = data_marseille[is.na(data_marseille$label_iris),], col = 'red', add = TRUE)
+```
+Ces IRIS correspondent à des zones peu ou pas peuplées (calanques, zones industrielles...).
+
+```{r}
+data_marseille <- merge(x = om_sf, y = om_df, by.x = "CODE_IRIS", by.y = "id_IRIS")
+
+# Il est possible que vos données spatiales ne soient pas propres et possèdent des lignes dupliquées (ça n'est pas le cas ici). Pour ne conserver qu'une seule ligne vous pouvez utiliser la ligne ci-dessous.
+#data_pauv <- data_pauv %>% distinct(DCOMIRIS, .keep_all = TRUE)
+
+datatable(head(data_marseille, 10))
+```
+
+Certaines lignes n'ont pas de valeur pour la colonne "tx_bas_revenu". Sachant que c'est justement cette info qui nous intéresse, on ne garde que les lignes pour lesquelles cette valeur est renseignée.
+
+```{r}
+# Cette ligne pour regrouper et éventuellement visualiser les iris n'ayant pas la donnée
+data_marseille_na = data_marseille %>% filter(is.na(tx_bas_revenu))
+
+# sans le pipe :
+#data_marseille_na = data_marseille[is.na(data_pauv$tx_bas_revenu),]
+
+nrow(data_marseille_na)
+
+# Ici le filtre pour ne conserver que les lignes ayant la variable tx_bas_revenu renseignée
+data_marseille = data_marseille  %>% filter(!is.na(tx_bas_revenu))
+#data_pauv = data_pauv[!is.na(data_pauv$tx_bas_revenu),]
+nrow(data_marseille)
+```
+
+<div class="alert alert-success" role="alert">
+Par ailleurs, un autre souci concernant les données spatiales peut survenir concernant la variable "geometry". Certains de nos polygones pourraient avoir des erreurs de topologie (auto-intersection par exemple), ce qui pose un problème avec certains packages. On utilise la fonction suivante pour y remédier lorsque cela s'avère nécessaire :` data_marseille$geometry <- st_make_valid(data_marseille$geometry)`
+</div>
+
+On visualise notre fichier finalisé. Voici Marseille !
+
+```{r}
+mf_map(x = data_marseille)
+```
+
+Et pour une première visualisation rapide et sommaire des variables que nous souhaitons étudier:
+
+```{r}
+plot(data_marseille[10:16])
+```
+
+
+Focus taux de bas revenus
+
+```{r}
+# La palette de couleur:
+cols_v1 <- c("#08519c", "#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#eff3ff", "#ffffce", "#fee5d9", "#fcbba1", "#fc9272",  "#fb6a4a", "#de2d26")
+
+# Carte du prix médian 
+mf_map(x = data_marseille, 
+       var = "tx_bas_revenu", 
+       type = "choro", 
+       border = "#ebebeb", 
+       lwd = 0.1, 
+       breaks=quantile(data_marseille$tx_bas_revenu,seq(0,1, by=1/11)), 
+       pal=cols_v1, 
+       leg_title = "Taux bas revenu", 
+       leg_val_rnd = 1)
+mf_title("Taux de bas revenu par Iris de Marseille") #titre
+
+```
+
+## Etape 1 : Exploration des variables
+
+
+```{r}
+library(table1)
+
+table1(~ tx_bas_revenu + PartPop_fr +	hlm_res_princ +	unevoiture + res120plus +	masc_cadre + fem_noncadre, data=data_marseille) 
+
+```
+
+<br> 
+Ou graphiquement pour observer leur distributon:
+<br> 
+
+```{r}
+library(plotly)
+add_histogram(plot_ly(data_marseille, x = ~tx_bas_revenu))
+
+# Distribution des variables indépendantes :
+a <- add_histogram(plot_ly(data_marseille, x = ~log(PartPop_fr), name = "PartPop_fr"))
+b <- add_histogram(plot_ly(data_marseille, x = ~log(hlm_res_princ), name = "hlm_res_princ"))
+c <- add_histogram(plot_ly(data_marseille, x = ~log(unevoiture), name = "unevoiture"))
+d <- add_histogram(plot_ly(data_marseille, x = ~log(res120plus), name = "res120plus"))
+e <- add_histogram(plot_ly(data_marseille, x = ~log(masc_cadre), name = "masc_cadre"))
+f <- add_histogram(plot_ly(data_marseille, x = ~log(fem_noncadre), name = "fem_noncadre"))
+fig = subplot(a, b, c, d, e, f, nrows = 2)
+fig
+```
+
+## Etape 2 : étude des corrélations
+
+### Réalisation des correlations avec R
+
+L'analyse se lance simplement avec ces lignes de codes:
+
+```{r}
+library(correlation)
+
+data_cor <- om_df %>% select(tx_bas_revenu,	PartPop_fr,	hlm_res_princ,	unevoiture,	res120plus,	masc_cadre,	fem_noncadre)
+
+marseille_cor <- correlation(data_cor, redundant = TRUE)
+
+summary(marseille_cor)
+
+```
+
+
+```{r}
+library(see)
+marseille_cor %>%
+  summary(redundant = FALSE) %>%
+  plot(type="tile", show_labels =TRUE, show_p = TRUE, digits = 1, size_text=3) +
+  see::theme_modern(axis.text.angle = 45)
+
+```
+
+## Etape 3 : Régression linéaire ou Méthode des moindre carrés ordinaire (MCO)
+
+```{r}
+
+mod.lm <- lm(formula = tx_bas_revenu ~ PartPop_fr +	hlm_res_princ +	unevoiture +	res120plus +	masc_cadre + fem_noncadre,
+             data = data_marseille)
+
+
+# On affiche les principaux résultats avec la fonction summary
+summary(mod.lm)
+```
+
+
+
+```{r}
+library(gtsummary)
+mod.lm %>%
+  tbl_regression(intercept = TRUE)
+
+library(parameters)
+model_parameters(mod.lm) |> print_md()
+```
+
+```{r}
+
+GGally::ggcoef_model(mod.lm)
+
+```
+
+Carto des résidus
+
+```{r}
+data_marseille$res_reg <- mod.lm$residuals
+```
+
+
+La carte des résidus :
+
+```{r}
+
+# Définition d'une palette de couleur
+cols_v1 <- c("#08519c", "#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#eff3ff", "#ffffce", "#fee5d9", "#fcbba1", "#fc9272",  "#fb6a4a", "#de2d26")
+
+# Réalisation de la carte
+mf_map(x = data_marseille, 
+       var = "res_reg", 
+       type = "choro", 
+       border = "#ebebeb", 
+       lwd = 0.1, 
+       breaks=quantile(data_marseille$res_reg,seq(0,1, by=1/11)), 
+       pal=cols_v1, 
+       leg_title = "Résidus de régression\nlinéaire 'classique'", 
+       leg_val_rnd = 1)
+mf_title("Résidus modèle lm") #titre
+
+```
+
+
+## Diagnostic du modèle
+
+
+### Rappel des conditions...
+
+1. Les types de variables à utiliser : continue ou catégorielle (ordinale ou dichotomique) pour nos prédicteurs, continue pour notre variable à prédire.
+
+2. Pas de variance égale à zéro chez nos prédicteurs : la distribution des prédicteurs doit comprendre une certaine variance, donc ne doit pas être constante.
+
+3. Absence ou faible multicolinéarité : La multicolinéarité se produit lorsque les variables indépendantes du modèle sont fortement corrélées les unes aux autres. Par conséquent, les corrélations ne doivent pas être trop fortes entre celles-ci. Une forte multicolinéarité peut rendre difficile la détermination des contributions individuelles de chaque prédicteur. Cette prémisse peut être vérifiée avec le VIF (Variance Inflation Factor) indiquant si une variable indépendante a une une relation linéaire forte avec les autres.
+
+4. Pas de corrélation entre les variables indépendantes et les variables externes : les variables d’influence doivent toutes être incluses dans le modèle.
+
+5. Homéocédasticité (homogénéité des variances des résidus) : la dispersion des résidus doit être à peu près la même pour toutes les valeurs des prédicteurs. En d'autres termes c'est l'hypothese que la variance des résidus est constante.
+
+6. Absence d'autocorrélation : L'autocorrélation suppose que les résidus ne sont pas corrélés les uns aux autres. Cette prémisse peut être vérifiée avec la statistique Durbin-Watson qui se situe entre 0 et 4, une valeur de 2 indiquant une absence de corrélation, moins de 2 une corrélation positive et plus de 2, une corrélation négative. La règle arbitraire cette fois est que la valeur ne doit pas être plus petite que 1 ou plus grande que 3.
+
+7. Distribution normale des résidus : bien que les variables indépendantes ne doivent pas nécessairement suivre une distribution normale, il importe que les résidus en suivent une. Cette hypothèse est particulièrement importante pour les tests d'hypothèses et l'estimation des intervalles de confiance.
+Ils doivent donc avoir une moyenne de 0, la majorité des valeurs doivent s’en rapprocher. Cette prémisse peut être vérifiée en enregistrant les valeurs résiduelles dans la base de données et en effectuant le test de Kolmogorov-Smirnov ou de Shapiro-Wilks. Vous devez vous assurer que le test n’est pas significatif pour conserver l’hypothèse nulle de distribution normale.
+
+8. Indépendance de la variable prédite : toutes les observations formant la distribution des valeurs de la variable dépendante sont indépendantes, viennent d’un individu différent.
+
+9. Relation linéaire entre les variables indépendantes et la variable dépendante : La relation entre les variables indépendantes (prédicteurs) et la variable dépendante (la cible) est supposée être linéaire. Cela signifie que les changements dans les prédicteurs ont un effet constant et additif sur la cible.
+
+
+### La Multicolinéarité
+
+```{r}
+# Avec la librairie "car"
+library(car)
+
+vif(mod.lm)
+
+library(performance)
+
+check_collinearity(mod.lm)
+
+library(gtsummary)
+
+mod.lm %>%
+  tbl_regression(intercept = TRUE) %>% add_vif()
+
+
+```
+
+
+```{r}
+
+# Avec la librairie "car"
+library(car)
+
+score_vif <- vif(mod.lm)
+
+barplot(score_vif, main = "VIF Values", horiz = TRUE, col = "steelblue", las=2)
+#ajout du seuil de 4
+abline(v = 4, lwd = 3, lty = 2)
+# et de la limite de 3
+abline(v = 3, lwd = 3, lty = 2)
+
+# Avec la librairie performance, mais attention ici pour le VIF il 'agit d'un seuil qui est représenté à voir s'il est compatible avec la pratique de votre discipline
+
+colinearite <-  check_collinearity(mod.lm)
+plot(colinearite)
+
+```
+
+### Gestion de la multicolinéarité
+
+2 variables ont un score de VIF élevé, la part de la population de nationalité française `PartPop_fr` et la part de femmes n'étant pas cadre. On supprime du modèle la part de la population de nationalité française pour voir comment notre modèle évolue.
+
+```{r}
+mod.lm2 <- lm(formula = tx_bas_revenu ~ hlm_res_princ +	unevoiture +	res120plus +	masc_cadre + fem_noncadre,
+             data = data_marseille)
+
+summary(mod.lm2)
+
+vif(mod.lm2)
+
+library(gtsummary)
+mod.lm2 %>%
+  tbl_regression(intercept = TRUE) %>% add_vif()
+
+GGally::ggcoef_model(mod.lm2)
+```
+
+
+### Linéarité de la relation VD et VI
+
+
+```{r}
+
+a <-ggplot(data_marseille, aes(x=PartPop_fr, y=tx_bas_revenu)) + 
+  geom_point() + geom_smooth(method = "lm")
+b <-ggplot(data_marseille, aes(x=hlm_res_princ, y=tx_bas_revenu)) + 
+  geom_point() + geom_smooth(method = "lm")
+c <-ggplot(data_marseille, aes(x=unevoiture , y=tx_bas_revenu)) + 
+  geom_point() + geom_smooth(method = "lm")
+d <-ggplot(data_marseille, aes(x=res120plus, y=tx_bas_revenu)) + 
+  geom_point() + geom_smooth(method = "lm")
+e <-ggplot(data_marseille, aes(x=masc_cadre, y=tx_bas_revenu)) + 
+  geom_point() + geom_smooth(method = "lm")
+f <-ggplot(data_marseille, aes(x=fem_noncadre, y=tx_bas_revenu)) + 
+  geom_point() + geom_smooth(method = "lm")
+
+
+fig = subplot(a, b, c, d, e, f,  nrows = 2)
+
+fig
+```
+
+
+```{r}
+plot(check_predictions(mod.lm))
+```
+
+
+```{r}
+a <-ggplot(data_marseille, aes(x=PartPop_fr, y=log(tx_bas_revenu))) + 
+  geom_point() + geom_smooth(method = "lm")
+b <-ggplot(data_marseille, aes(x=hlm_res_princ, y=log(tx_bas_revenu))) + 
+  geom_point() + geom_smooth(method = "lm")
+c <-ggplot(data_marseille, aes(x=unevoiture , y=log(tx_bas_revenu))) + 
+  geom_point() + geom_smooth(method = "lm")
+d <-ggplot(data_marseille, aes(x=res120plus, y=log(tx_bas_revenu))) + 
+  geom_point() + geom_smooth(method = "lm")
+e <-ggplot(data_marseille, aes(x=masc_cadre, y=log(tx_bas_revenu))) + 
+  geom_point() + geom_smooth(method = "lm")
+f <-ggplot(data_marseille, aes(x=fem_noncadre, y=log(tx_bas_revenu))) + 
+  geom_point() + geom_smooth(method = "lm")
+
+
+fig = subplot(a, b, c, d, e, f,  nrows = 2)
+
+fig
+```
+
+Cela n'est certes pas parfait mais tout de même mieux.
+
+
+```{r}
+
+mod.lm_log <- lm(formula = tx_bas_revenu ~ PartPop_fr +	hlm_res_princ +	unevoiture +	res120plus +	masc_cadre + fem_noncadre,
+             data = data_marseille)
+plot(check_predictions(mod.lm_log))
+```
+
+
+### Analyser les résidus
+
+L'analyse des résidus est très importante car les conditions de validité d'un modèle linéaire au delà des résultats repose grandement sur les résidus. Ils permettent en outre aussi d'identifier les individus extrêmes (ou outliers) et très souvent également expliquer la linarité de la relation VD/VI.
+
+<div class="alert alert-danger" role="alert">
+Pour rappel, les résidus correspondent à l'écart au modèle. Ainsi, un résidu > 0 implique que notre individu a été sous-estimé par le modèle (il est au dessus de la droite de régression), un résidu < 0 que l'individu a été sur-estimé par le modèle (il est sous la droite de régression).
+</div>
+
+Les 3 conditions qui concernent les résidus sont :
+
+- Ils doivent suivre une loi normale.
+- Ils ne doivent pas varier en fonction des variables explicatives. C'est l'hypothèse d'homoscédasticité, ils ont une variance homogène.
+- Ils ne doivent pas être autocorrélés.
+
+Pour obtenir les résidus :
+```{r}
+res_modlm <- mod.lm$residuals
+datatable(as.data.frame(res_modlm))
+```
+
+
+Brutes de cette manière cela ne dit pas grand chose, il est nécessaire de les visualiser. De manière générale voici les graphiques que l'on voit fréquemment concernant les résidus en R base.
+
+
+```{r, eval=FALSE}
+
+par(mfrow=c(1,3))
+qqPlot(mod.lm) # diagramme quantile-quantile qui permet de vérifier l'ajustement d'une distribution à un modèle théorique, ici loi normale
+hist(rstudent(mod.lm), breaks = 50, col="darkblue", border="white", main="Analyse visuelle des résidus") # Histogramme pour donner une autre indication sur la normalité
+plot(rstudent(mod.lm)) # un graphique pour visualiser l'homoscédasticité des résidus
+
+```
+
+```{r, echo=FALSE, fig.cap="Résultats de la commande *summary(mod.lm)*", out.width = '500', fig.align = 'center'}
+knitr::include_graphics(here("images", "plot_res.png"))
+```
+
+Le package `performance` peut une fois de plus être une alternative très intéressante et nous macher le travail. On pourra aisément tester ces conditions et les visualiser de manière moins aride qu'en R base. Ces fonctions fournissent des indicateurs d'aide à la décision qui sont plus claires. 
+
+```{r}
+
+# Pour la normalité des résidus
+normality <- check_normality(mod.lm)
+normality
+plot(normality)
+
+# Pour l'homoscédasticité
+
+heteroscedasticity <- check_heteroscedasticity(mod.lm)
+heteroscedasticity
+plot(heteroscedasticity)
+
+ind_ext <- check_outliers(mod.lm)
+ind_ext
+plot(ind_ext, type = "dots")
+```
+
+<div class="alert alert-danger" role="alert">
+Attention, la fonction `check_outliers()` propose de nombreuses méthodes différentes pour identier les individus extrêmes.
+Par défaut, cette fonction utilise la distance de Cook qui considère l’effet d’un cas sur l’ensemble du modèle. Les valeurs très proche ou plus élevées que 1 doivent retenir l’attention. L'autre distance très utilisé (notamment dans le cas des analyse multidimensionnelle genre analyse factorielle) c'est la distance de Mahalanobis qui mesure la distance entre une observation et la moyenne des valeurs prédites. Le point de coupure indiquant une distance problématique dépend du nombre de prédicteurs et de la taille de l’échantillon.
+</div>
+
+Il est possible d'utiliser des tests statistique qui servent spécifiquement à vérifier la normalité ou de tester l'homoscédasticité.
+Ils ont cela de particulier qu'ici nous cherchons à accepter H0 et donc pour valider la normalité ou l'homoscédasticité il faut que $p-value > 0.05$
+
+```{r}
+# Pour étudier la normalité on peut utiliser le test de Shapiro-Wilk
+shapiro.test(mod.lm$residuals)
+
+# Pour évaluer l'homoscédasticité on peut utiliser le test de Breusch-Pagan. Le package car propose une fonction pour le réaliser
+ncvTest(mod.lm)
+
+```
+
+
+### L'autocorrélation des résidus
+
+C'est une des conditions qui pose en généralle le plus problème, car elle implique beaucoup de choses finalement sur nos données ou notre cadre de réflexions.
+
+Pour vérifier facilement s'il y a un quelconque risque d'auto-correlation :
+
+```{r}
+check_autocorrelation(mod.lm)
+```
+
